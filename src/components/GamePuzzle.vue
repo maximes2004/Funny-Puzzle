@@ -29,6 +29,9 @@
           @dragstart="dragStart"
           @dragover="dragOver"
           @drop="dropPiece(index)"
+          @touchstart="touchStart(index, $event)"
+          @touchmove="touchMove($event)"
+          @touchend="touchEnd(index)"
         >
           <img
             :src="piece.img"
@@ -91,6 +94,7 @@ export default {
       timerInterval: null,
       errorMessage: '',
       gameCompleted: false,
+      dragStartIndex: null,
     };
   },
   methods: {
@@ -146,6 +150,26 @@ export default {
         const temp = this.puzzlePieces[draggedIndex];
         this.puzzlePieces[draggedIndex] = this.puzzlePieces[index];
         this.puzzlePieces[index] = temp;
+      }
+    },
+    touchStart(index, event) {
+      this.dragStartIndex = index;
+      event.target.style.touchAction = 'none'; // Запрет на жесты прокрутки
+    },
+    touchMove(event) {
+      event.preventDefault();
+      const touch = event.touches[0];
+      const element = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (element && element.classList.contains('puzzle-piece')) {
+        element.style.border = '2px dashed blue'; // Указать текущую цель
+      }
+    },
+    touchEnd(dropIndex) {
+      if (this.dragStartIndex !== null && dropIndex !== null) {
+        const temp = this.puzzlePieces[this.dragStartIndex];
+        this.puzzlePieces[this.dragStartIndex] = this.puzzlePieces[dropIndex];
+        this.puzzlePieces[dropIndex] = temp;
+        this.dragStartIndex = null; // Сброс начального индекса
       }
     },
     viewLeaderboard() {
