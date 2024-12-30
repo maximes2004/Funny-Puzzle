@@ -146,13 +146,16 @@ export default {
       e.preventDefault();
     },
     dropPiece(index) {
-      const draggedId = event.dataTransfer.getData('text/plain');
-      const draggedIndex = this.puzzlePieces.findIndex((piece) => piece.id === draggedId);
-      if (draggedIndex !== -1) {
-        const temp = this.puzzlePieces[draggedIndex];
-        this.puzzlePieces[draggedIndex] = this.puzzlePieces[index];
-        this.puzzlePieces[index] = temp;
-      }
+      return (event) => {
+        event.preventDefault();
+        const draggedId = event.dataTransfer.getData('text/plain');
+        const draggedIndex = this.puzzlePieces.findIndex((piece) => piece.id === draggedId);
+        if (draggedIndex !== -1) {
+          const temp = this.puzzlePieces[draggedIndex];
+          this.puzzlePieces[draggedIndex] = this.puzzlePieces[index];
+          this.puzzlePieces[index] = temp;
+        }
+      };
     },
     // Обработка касания
     touchStart(index, event) {
@@ -269,6 +272,6 @@ button:disabled {
 
 .timer-block {
   padding-top: 0.5rem;
-  color: brown;
+  color: blue;
 }
 </style>
