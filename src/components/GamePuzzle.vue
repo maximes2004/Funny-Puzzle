@@ -153,26 +153,45 @@ export default {
       }
       this.draggedPieceIndex = null;
     },
-    touchStart(event, index) {
-      this.draggedPieceIndex = index;
-      event.preventDefault();
-    },
-    touchMove(event) {
+  // Начало касания
+  touchStart(index, event) {
+    this.dragIndex = index; // Запоминаем начальный индекс
+    const touch = event.touches[0];
+    this.touchPosition = { x: touch.clientX, y: touch.clientY }; // Запоминаем начальные координаты
+  },
+  // Перемещение элемента
+  touchMove(index, event) {
+    if (this.dragIndex !== null && this.touchPosition) {
+      event.preventDefault(); // Отключаем стандартное поведение прокрутки
       const touch = event.touches[0];
-      const element = document.elementFromPoint(touch.clientX, touch.clientY);
-      if (element && element.classList.contains('puzzle-piece')) {
-        element.style.background = '#f0f0f0';
+      const deltaX = touch.clientX - this.touchPosition.x;
+      const deltaY = touch.clientY - this.touchPosition.y;
+
+      // Визуальное перемещение элемента
+      const piece = event.target.closest('.puzzle-piece');
+      if (piece) {
+        piece.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
       }
-      event.preventDefault();
-    },
-    touchEnd(index) {
-      const draggedIndex = this.draggedPieceIndex;
-      if (draggedIndex !== null && draggedIndex !== index) {
-        const temp = this.puzzlePieces[draggedIndex];
-        this.puzzlePieces[draggedIndex] = this.puzzlePieces[index];
-        this.puzzlePieces[index] = temp;
-      }
-      this.draggedPieceIndex = null;
+    }
+  },
+  // Завершение касания
+  touchEnd(index, event) {
+    const targetPiece = event.target.closest('.puzzle-piece');
+    if (this.dragIndex !== null && this.dragIndex !== index && targetPiece) {
+      // Обмен местами
+      const temp = this.puzzlePieces[this.dragIndex];
+      this.puzzlePieces[this.dragIndex] = this.puzzlePieces[index];
+      this.puzzlePieces[index] = temp;
+     }
+
+    // Сброс значений
+    this.dragIndex = null;
+    this.touchPosition = null;
+
+    // Сбрасываем трансформацию
+    if (targetPiece) {
+      targetPiece.style.transform = '';
+     }
     },
     viewLeaderboard() {
       this.$router.push('/leaderboard');
