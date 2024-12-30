@@ -156,10 +156,10 @@ export default {
     },
     // Обработка касания
     touchStart(index, event) {
-    event.preventDefault();
-    this.dragStartIndex = index;
-    this.startTouchX = event.touches[0].clientX;
-    this.startTouchY = event.touches[0].clientY;
+      event.preventDefault();
+      this.dragStartIndex = index;
+      this.startTouchX = event.touches[0].clientX;
+      this.startTouchY = event.touches[0].clientY;
     },
     touchMove(event) {
       event.preventDefault();
@@ -269,6 +269,6 @@ button:disabled {
 
 .timer-block {
   padding-top: 0.5rem;
-  color: green;
+  color: brown;
 }
 </style>
