@@ -231,9 +231,6 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  user-select: none; /* Отключение выделения */
-  touch-action: none; /* Отключение жестов */
-  pointer-events: none; /* Исключить из стандартных событий мыши */
 }
 
 button {
