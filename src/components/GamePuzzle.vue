@@ -259,6 +259,6 @@ button:disabled {
 
 .timer-block {
   padding-top: 0.5rem;
-  color: green;
+  color: brown;
 }
 </style>
