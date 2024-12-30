@@ -153,8 +153,8 @@ export default {
       }
       this.draggedPieceIndex = null;
     },
-      touchStart(index, event) {
-      this.dragIndex = index; // Запоминаем индекс начального элемента
+    touchStart(index, event) {
+      this.dragIndex = index;
       const touch = event.touches[0];
       this.touchPosition = { x: touch.clientX, y: touch.clientY };
     },
@@ -171,13 +171,15 @@ export default {
       }
     },
     touchEnd(index, event) {
-      const piece = event.target.closest('.puzzle-piece');
-      if (this.dragIndex !== null && piece) {
+      if (this.dragIndex !== null) {
         const temp = this.puzzlePieces[this.dragIndex];
         this.puzzlePieces[this.dragIndex] = this.puzzlePieces[index];
         this.puzzlePieces[index] = temp;
 
-        piece.style.transform = ''; // Сбрасываем перемещение
+        const piece = event.target.closest('.puzzle-piece');
+        if (piece) {
+          piece.style.transform = ''; // Сбрасываем перемещение
+        }
       }
       this.dragIndex = null;
       this.touchPosition = null;
@@ -275,6 +277,15 @@ button:disabled {
 
 .timer-block {
   padding-top: 0.5rem;
-  color: red;
+  color: yellow;
+}
+.puzzle-grid {
+  overflow: visible !important;
+}
+
+.puzzle-piece {
+  position: relative;
+  z-index: 10; /* Чтобы элементы перемещались поверх остальных */
+  cursor: pointer; /* Указатель для подтверждения взаимодействия */
 }
 </style>
