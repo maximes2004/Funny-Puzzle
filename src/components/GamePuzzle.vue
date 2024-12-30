@@ -29,6 +29,9 @@
           @dragstart="dragStart"
           @dragover="dragOver"
           @drop="dropPiece(index)"
+          @touchstart="touchStart(index, $event)"
+          @touchmove="touchMove($event)"
+          @touchend="touchEnd(index)"
         >
           <img
             :src="piece.img"
@@ -40,7 +43,7 @@
         </div>
       </div>
 
-      <p>Время: {{ timer }}</p>
+      <p class="timer-block">Время: {{ timer }}</p>
       <button @click="checkSolution">Завершить игру</button>
       <button @click="restartGame">Попробовать еще раз</button>
       <button @click="viewLeaderboard">Таблица лидеров</button>
@@ -91,6 +94,8 @@ export default {
       timerInterval: null,
       errorMessage: '',
       gameCompleted: false,
+      dragIndex: null,
+      touchIndex: null,
     };
   },
   methods: {
@@ -134,19 +139,33 @@ export default {
       this.puzzlePieces = this.puzzlePieces.sort(() => Math.random() - 0.5);
     },
     dragStart(e) {
-      e.dataTransfer.setData('text/plain', e.target.id);
+      this.dragIndex = e.target.id;
     },
     dragOver(e) {
       e.preventDefault();
     },
     dropPiece(index) {
-      const draggedId = event.dataTransfer.getData('text/plain');
-      const draggedIndex = this.puzzlePieces.findIndex((piece) => piece.id === draggedId);
+      const draggedIndex = this.puzzlePieces.findIndex((piece) => piece.id === this.dragIndex);
       if (draggedIndex !== -1) {
         const temp = this.puzzlePieces[draggedIndex];
         this.puzzlePieces[draggedIndex] = this.puzzlePieces[index];
         this.puzzlePieces[index] = temp;
       }
+      this.dragIndex = null;
+    },
+    touchStart(index, event) {
+      // Здесь нет необходимости в параметре event, если он не используется
+    },
+    touchMove(event) {
+      event.preventDefault();
+    },
+    touchEnd(index) {
+      if (this.touchIndex !== null) {
+        const temp = this.puzzlePieces[this.touchIndex];
+        this.$set(this.puzzlePieces, this.touchIndex, this.puzzlePieces[index]);
+        this.$set(this.puzzlePieces, index, temp);
+      }
+      this.touchIndex = null;
     },
     viewLeaderboard() {
       this.$router.push('/leaderboard');
@@ -156,9 +175,9 @@ export default {
       localStorage.removeItem('username');
       this.isFormVisible = true;
       this.isNameSaved = false;
-      clearInterval(this.timerInterval); // Сброс таймера
-      this.timer = 0; // Обнуление таймера
-      this.gameStarted = false; // Завершение игры
+      clearInterval(this.timerInterval);
+      this.timer = 0;
+      this.gameStarted = false;
       this.$router.push('/');
     },
     restartGame() {
@@ -205,6 +224,11 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.timer-block {
+  font-size: 20px;
+  margin-top: 15px;
 }
 
 button {
