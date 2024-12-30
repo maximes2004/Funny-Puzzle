@@ -26,9 +26,12 @@
           v-for="(piece, index) in puzzlePieces"
           :key="index"
           class="puzzle-piece"
-          @dragstart="dragStart"
+          @dragstart="dragStart($event, index)"
           @dragover="dragOver"
           @drop="dropPiece(index)"
+          @touchstart="touchStart($event, index)"
+          @touchmove="touchMove($event)"
+          @touchend="touchEnd(index)"
         >
           <img
             :src="piece.img"
@@ -40,7 +43,7 @@
         </div>
       </div>
 
-      <p>Время: {{ timer }}</p>
+      <p class="timer-block">Время: {{ timer }}</p>
       <button @click="checkSolution">Завершить игру</button>
       <button @click="restartGame">Попробовать еще раз</button>
       <button @click="viewLeaderboard">Таблица лидеров</button>
@@ -58,7 +61,7 @@ export default {
   data() {
     return {
       puzzlePieces: [
-        { id: 'puzzle-1', img: 'puzzle1.jpg', alt: 'puzzle 1' },
+      { id: 'puzzle-1', img: 'puzzle1.jpg', alt: 'puzzle 1' },
         { id: 'puzzle-2', img: 'puzzle2.jpg', alt: 'puzzle 2' },
         { id: 'puzzle-3', img: 'puzzle3.jpg', alt: 'puzzle 3' },
         { id: 'puzzle-4', img: 'puzzle4.jpg', alt: 'puzzle 4' },
@@ -91,6 +94,7 @@ export default {
       timerInterval: null,
       errorMessage: '',
       gameCompleted: false,
+      draggedPieceIndex: null,
     };
   },
   methods: {
@@ -133,20 +137,42 @@ export default {
     shufflePuzzle() {
       this.puzzlePieces = this.puzzlePieces.sort(() => Math.random() - 0.5);
     },
-    dragStart(e) {
-      e.dataTransfer.setData('text/plain', e.target.id);
+    dragStart(event, index) {
+      this.draggedPieceIndex = index;
+      event.dataTransfer.setData('text/plain', index);
     },
-    dragOver(e) {
-      e.preventDefault();
+    dragOver(event) {
+      event.preventDefault();
     },
     dropPiece(index) {
-      const draggedId = event.dataTransfer.getData('text/plain');
-      const draggedIndex = this.puzzlePieces.findIndex((piece) => piece.id === draggedId);
-      if (draggedIndex !== -1) {
+      const draggedIndex = this.draggedPieceIndex;
+      if (draggedIndex !== null && draggedIndex !== index) {
         const temp = this.puzzlePieces[draggedIndex];
         this.puzzlePieces[draggedIndex] = this.puzzlePieces[index];
         this.puzzlePieces[index] = temp;
       }
+      this.draggedPieceIndex = null;
+    },
+    touchStart(event, index) {
+      this.draggedPieceIndex = index;
+      event.preventDefault();
+    },
+    touchMove(event) {
+      const touch = event.touches[0];
+      const element = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (element && element.classList.contains('puzzle-piece')) {
+        element.style.background = '#f0f0f0';
+      }
+      event.preventDefault();
+    },
+    touchEnd(index) {
+      const draggedIndex = this.draggedPieceIndex;
+      if (draggedIndex !== null && draggedIndex !== index) {
+        const temp = this.puzzlePieces[draggedIndex];
+        this.puzzlePieces[draggedIndex] = this.puzzlePieces[index];
+        this.puzzlePieces[index] = temp;
+      }
+      this.draggedPieceIndex = null;
     },
     viewLeaderboard() {
       this.$router.push('/leaderboard');
@@ -156,9 +182,9 @@ export default {
       localStorage.removeItem('username');
       this.isFormVisible = true;
       this.isNameSaved = false;
-      clearInterval(this.timerInterval); // Сброс таймера
-      this.timer = 0; // Обнуление таймера
-      this.gameStarted = false; // Завершение игры
+      clearInterval(this.timerInterval);
+      this.timer = 0;
+      this.gameStarted = false;
       this.$router.push('/');
     },
     restartGame() {
@@ -237,5 +263,9 @@ button:disabled {
   color: red;
   font-size: 14px;
   margin-top: 10px;
+}
+
+.timer-block {
+  padding-top: 0.5rem;
 }
 </style>
