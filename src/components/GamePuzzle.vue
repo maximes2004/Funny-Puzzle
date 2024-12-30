@@ -95,6 +95,8 @@ export default {
       errorMessage: '',
       gameCompleted: false,
       dragStartIndex: null,
+      startTouchX: null,
+      startTouchY: null,
     };
   },
   methods: {
