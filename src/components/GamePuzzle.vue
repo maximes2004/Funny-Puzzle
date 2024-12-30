@@ -30,6 +30,7 @@
           @dragover="dragOver"
           @drop="dropPiece(index)"
           @touchstart="touchStart(index, $event)"
+          @touchmove="touchMove($event)"
           @touchend="touchEnd(index)"
         >
           <img
@@ -37,7 +38,7 @@
             :alt="piece.alt"
             :id="piece.id"
             class="puzzle-img"
-            draggable="true"
+            draggable="false"
           />
         </div>
       </div>
@@ -153,18 +154,25 @@ export default {
     },
     // Обработка касания
     touchStart(index, event) {
-      event.preventDefault(); // Отключение стандартного поведения
-      this.dragStartIndex = index;
-      document.body.style.overflow = 'hidden'; // Отключить скроллинг страницы
+    event.preventDefault();
+    this.dragStartIndex = index;
+    this.startTouchX = event.touches[0].clientX;
+    this.startTouchY = event.touches[0].clientY;
+    },
+    touchMove(event) {
+      event.preventDefault();
+      // Вы можете добавить визуальный эффект перемещения здесь, если требуется.
     },
     touchEnd(dropIndex) {
       if (this.dragStartIndex !== null && dropIndex !== null) {
+        // Меняем местами элементы
         const temp = this.puzzlePieces[this.dragStartIndex];
         this.puzzlePieces[this.dragStartIndex] = this.puzzlePieces[dropIndex];
         this.puzzlePieces[dropIndex] = temp;
       }
       this.dragStartIndex = null;
-      document.body.style.overflow = ''; // Включить скроллинг страницы
+      this.startTouchX = null;
+      this.startTouchY = null;
     },
     viewLeaderboard() {
       this.$router.push('/leaderboard');
@@ -223,6 +231,9 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  user-select: none; /* Отключение выделения */
+  touch-action: none; /* Отключение жестов */
+  pointer-events: none; /* Исключить из стандартных событий мыши */
 }
 
 button {
