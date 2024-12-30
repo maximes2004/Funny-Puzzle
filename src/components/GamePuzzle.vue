@@ -171,10 +171,13 @@ export default {
       }
     },
     touchEnd(index, event) {
-      if (this.dragIndex !== null) {
-        const temp = this.puzzlePieces[this.dragIndex];
-        this.puzzlePieces[this.dragIndex] = this.puzzlePieces[index];
-        this.puzzlePieces[index] = temp;
+      if (this.touchPosition !== null) {
+        const temp = this.puzzlePieces[this.touchPosition];
+        this.$set(this.puzzlePieces, this.touchPosition, this.puzzlePieces[index]);
+        this.$set(this.puzzlePieces, index, temp);
+
+        // Принудительно обновляем DOM
+        this.$forceUpdate();
 
         const piece = event.target.closest('.puzzle-piece');
         if (piece) {
