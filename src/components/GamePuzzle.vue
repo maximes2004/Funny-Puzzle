@@ -26,12 +26,12 @@
           v-for="(piece, index) in puzzlePieces"
           :key="index"
           class="puzzle-piece"
-          @dragstart="dragStart($event, index)"
+          @dragstart="dragStart"
           @dragover="dragOver"
           @drop="dropPiece(index)"
-          @touchstart="touchStart($event, index)"
-          @touchmove="touchMove($event)"
-          @touchend="touchEnd(index)"
+          @touchstart="touchStart(index, $event)"
+          @touchmove="touchMove(index, $event)"
+          @touchend="touchEnd(index, $event)"
         >
           <img
             :src="piece.img"
@@ -61,7 +61,7 @@ export default {
   data() {
     return {
       puzzlePieces: [
-      { id: 'puzzle-1', img: 'puzzle1.jpg', alt: 'puzzle 1' },
+        { id: 'puzzle-1', img: 'puzzle1.jpg', alt: 'puzzle 1' },
         { id: 'puzzle-2', img: 'puzzle2.jpg', alt: 'puzzle 2' },
         { id: 'puzzle-3', img: 'puzzle3.jpg', alt: 'puzzle 3' },
         { id: 'puzzle-4', img: 'puzzle4.jpg', alt: 'puzzle 4' },
@@ -94,7 +94,8 @@ export default {
       timerInterval: null,
       errorMessage: '',
       gameCompleted: false,
-      draggedPieceIndex: null,
+      dragIndex: null,
+      touchPosition: null,
     };
   },
   methods: {
@@ -137,47 +138,32 @@ export default {
     shufflePuzzle() {
       this.puzzlePieces = this.puzzlePieces.sort(() => Math.random() - 0.5);
     },
-    dragStart(event, index) {
-      this.draggedPieceIndex = index;
-      event.dataTransfer.setData('text/plain', index);
+    dragStart(e) {
+      this.dragIndex = e.target.id;
     },
-    dragOver(event) {
-      event.preventDefault();
+    dragOver(e) {
+      e.preventDefault();
     },
     dropPiece(index) {
-      const draggedIndex = this.draggedPieceIndex;
-      if (draggedIndex !== null && draggedIndex !== index) {
+      const draggedIndex = this.puzzlePieces.findIndex((piece) => piece.id === this.dragIndex);
+      if (draggedIndex !== -1) {
         const temp = this.puzzlePieces[draggedIndex];
         this.puzzlePieces[draggedIndex] = this.puzzlePieces[index];
         this.puzzlePieces[index] = temp;
       }
-      this.draggedPieceIndex = null;
+      this.dragIndex = null;
     },
     touchStart(index, event) {
-      this.dragIndex = index;
-      const touch = event.touches[0];
-      this.touchPosition = { x: touch.clientX, y: touch.clientY };
+      this.touchPosition = index;
     },
     touchMove(index, event) {
-      if (this.dragIndex !== null && this.touchPosition) {
-        const touch = event.touches[0];
-        const deltaX = touch.clientX - this.touchPosition.x;
-        const deltaY = touch.clientY - this.touchPosition.y;
-
-        const piece = event.target.closest('.puzzle-piece');
-        if (piece) {
-          piece.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-        }
-      }
+      event.preventDefault();
     },
     touchEnd(index, event) {
       if (this.touchPosition !== null) {
         const temp = this.puzzlePieces[this.touchPosition];
         this.$set(this.puzzlePieces, this.touchPosition, this.puzzlePieces[index]);
         this.$set(this.puzzlePieces, index, temp);
-
-        // Принудительно обновляем DOM
-        this.$forceUpdate();
 
         const piece = event.target.closest('.puzzle-piece');
         if (piece) {
@@ -195,9 +181,9 @@ export default {
       localStorage.removeItem('username');
       this.isFormVisible = true;
       this.isNameSaved = false;
-      clearInterval(this.timerInterval);
-      this.timer = 0;
-      this.gameStarted = false;
+      clearInterval(this.timerInterval); // Сброс таймера
+      this.timer = 0; // Обнуление таймера
+      this.gameStarted = false; // Завершение игры
       this.$router.push('/');
     },
     restartGame() {
@@ -246,6 +232,11 @@ export default {
   object-fit: cover;
 }
 
+.timer-block {
+  font-size: 20px;
+  margin-top: 15px;
+}
+
 button {
   margin: 10px;
   padding: 10px 20px;
@@ -276,19 +267,5 @@ button:disabled {
   color: red;
   font-size: 14px;
   margin-top: 10px;
-}
-
-.timer-block {
-  padding-top: 0.5rem;
-  color: yellow;
-}
-.puzzle-grid {
-  overflow: visible !important;
-}
-
-.puzzle-piece {
-  position: relative;
-  z-index: 10; /* Чтобы элементы перемещались поверх остальных */
-  cursor: pointer; /* Указатель для подтверждения взаимодействия */
 }
 </style>
