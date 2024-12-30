@@ -153,45 +153,34 @@ export default {
       }
       this.draggedPieceIndex = null;
     },
-  // Начало касания
-  touchStart(index, event) {
-    this.dragIndex = index; // Запоминаем начальный индекс
-    const touch = event.touches[0];
-    this.touchPosition = { x: touch.clientX, y: touch.clientY }; // Запоминаем начальные координаты
-  },
-  // Перемещение элемента
-  touchMove(index, event) {
-    if (this.dragIndex !== null && this.touchPosition) {
-      event.preventDefault(); // Отключаем стандартное поведение прокрутки
+      touchStart(index, event) {
+      this.dragIndex = index; // Запоминаем индекс начального элемента
       const touch = event.touches[0];
-      const deltaX = touch.clientX - this.touchPosition.x;
-      const deltaY = touch.clientY - this.touchPosition.y;
+      this.touchPosition = { x: touch.clientX, y: touch.clientY };
+    },
+    touchMove(index, event) {
+      if (this.dragIndex !== null && this.touchPosition) {
+        const touch = event.touches[0];
+        const deltaX = touch.clientX - this.touchPosition.x;
+        const deltaY = touch.clientY - this.touchPosition.y;
 
-      // Визуальное перемещение элемента
-      const piece = event.target.closest('.puzzle-piece');
-      if (piece) {
-        piece.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+        const piece = event.target.closest('.puzzle-piece');
+        if (piece) {
+          piece.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+        }
       }
-    }
-  },
-  // Завершение касания
-  touchEnd(index, event) {
-    const targetPiece = event.target.closest('.puzzle-piece');
-    if (this.dragIndex !== null && this.dragIndex !== index && targetPiece) {
-      // Обмен местами
-      const temp = this.puzzlePieces[this.dragIndex];
-      this.puzzlePieces[this.dragIndex] = this.puzzlePieces[index];
-      this.puzzlePieces[index] = temp;
-     }
+    },
+    touchEnd(index, event) {
+      const piece = event.target.closest('.puzzle-piece');
+      if (this.dragIndex !== null && piece) {
+        const temp = this.puzzlePieces[this.dragIndex];
+        this.puzzlePieces[this.dragIndex] = this.puzzlePieces[index];
+        this.puzzlePieces[index] = temp;
 
-    // Сброс значений
-    this.dragIndex = null;
-    this.touchPosition = null;
-
-    // Сбрасываем трансформацию
-    if (targetPiece) {
-      targetPiece.style.transform = '';
-     }
+        piece.style.transform = ''; // Сбрасываем перемещение
+      }
+      this.dragIndex = null;
+      this.touchPosition = null;
     },
     viewLeaderboard() {
       this.$router.push('/leaderboard');
@@ -286,5 +275,6 @@ button:disabled {
 
 .timer-block {
   padding-top: 0.5rem;
+  color: red;
 }
 </style>
