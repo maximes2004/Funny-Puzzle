@@ -152,19 +152,19 @@ export default {
       }
     },
     // Обработка касания
-    touchStart(index) {
-      this.dragStartIndex = index; // Запоминаем начальную позицию элемента
+    touchStart(index, event) {
+      event.preventDefault(); // Отключение стандартного поведения
+      this.dragStartIndex = index;
+      document.body.style.overflow = 'hidden'; // Отключить скроллинг страницы
     },
     touchEnd(dropIndex) {
       if (this.dragStartIndex !== null && dropIndex !== null) {
-        // Меняем элементы местами в массиве
         const temp = this.puzzlePieces[this.dragStartIndex];
         this.puzzlePieces[this.dragStartIndex] = this.puzzlePieces[dropIndex];
         this.puzzlePieces[dropIndex] = temp;
-
-        // Сброс начальной позиции
-        this.dragStartIndex = null;
       }
+      this.dragStartIndex = null;
+      document.body.style.overflow = ''; // Включить скроллинг страницы
     },
     viewLeaderboard() {
       this.$router.push('/leaderboard');
