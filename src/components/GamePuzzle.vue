@@ -38,7 +38,7 @@
             :alt="piece.alt"
             :id="piece.id"
             class="puzzle-img"
-            draggable="false"
+            draggable="true"
           />
         </div>
       </div>
