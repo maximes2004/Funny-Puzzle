@@ -29,9 +29,6 @@
           @dragstart="dragStart"
           @dragover="dragOver"
           @drop="dropPiece(index)"
-          @touchstart="touchStart(index, $event)"
-          @touchmove="touchMove(index, $event)"
-          @touchend="touchEnd(index, $event)"
         >
           <img
             :src="piece.img"
@@ -43,7 +40,7 @@
         </div>
       </div>
 
-      <p class="timer-block">Время: {{ timer }}</p>
+      <p>Время: {{ timer }}</p>
       <button @click="checkSolution">Завершить игру</button>
       <button @click="restartGame">Попробовать еще раз</button>
       <button @click="viewLeaderboard">Таблица лидеров</button>
@@ -94,8 +91,6 @@ export default {
       timerInterval: null,
       errorMessage: '',
       gameCompleted: false,
-      dragIndex: null,
-      touchPosition: null,
     };
   },
   methods: {
@@ -139,39 +134,19 @@ export default {
       this.puzzlePieces = this.puzzlePieces.sort(() => Math.random() - 0.5);
     },
     dragStart(e) {
-      this.dragIndex = e.target.id;
+      e.dataTransfer.setData('text/plain', e.target.id);
     },
     dragOver(e) {
       e.preventDefault();
     },
     dropPiece(index) {
-      const draggedIndex = this.puzzlePieces.findIndex((piece) => piece.id === this.dragIndex);
+      const draggedId = event.dataTransfer.getData('text/plain');
+      const draggedIndex = this.puzzlePieces.findIndex((piece) => piece.id === draggedId);
       if (draggedIndex !== -1) {
         const temp = this.puzzlePieces[draggedIndex];
         this.puzzlePieces[draggedIndex] = this.puzzlePieces[index];
         this.puzzlePieces[index] = temp;
       }
-      this.dragIndex = null;
-    },
-    touchStart(index, event) {
-      this.touchPosition = index;
-    },
-    touchMove(index, event) {
-      event.preventDefault();
-    },
-    touchEnd(index, event) {
-      if (this.touchPosition !== null) {
-        const temp = this.puzzlePieces[this.touchPosition];
-        this.$set(this.puzzlePieces, this.touchPosition, this.puzzlePieces[index]);
-        this.$set(this.puzzlePieces, index, temp);
-
-        const piece = event.target.closest('.puzzle-piece');
-        if (piece) {
-          piece.style.transform = ''; // Сбрасываем перемещение
-        }
-      }
-      this.dragIndex = null;
-      this.touchPosition = null;
     },
     viewLeaderboard() {
       this.$router.push('/leaderboard');
@@ -230,11 +205,6 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.timer-block {
-  font-size: 20px;
-  margin-top: 15px;
 }
 
 button {
