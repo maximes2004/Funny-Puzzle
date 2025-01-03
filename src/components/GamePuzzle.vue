@@ -31,7 +31,7 @@
           @drop="dropPiece(index)"
           @touchstart="touchStart(index, $event)"
           @touchmove="touchMove($event)"
-          @touchend="touchEnd(index)"
+          @touchend="touchEnd"  <!-- Убран параметр index -->
         >
           <img
             :src="piece.img"
@@ -202,7 +202,7 @@ export default {
     });
   },
 
-  touchEnd(dropIndex) {
+    touchEnd(event) {  // Изменено с touchEnd(dropIndex) на touchEnd(event)
     if (!this.isDragging) return;
     
     // Находим элемент в точке отпускания
