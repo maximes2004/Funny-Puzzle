@@ -31,7 +31,7 @@
           @drop="dropPiece(index)"
           @touchstart="touchStart(index, $event)"
           @touchmove="touchMove($event)"
-          @touchend="touchEnd"  <!-- Убран параметр index -->
+          @touchend="touchEnd"
         >
           <img
             :src="piece.img"
@@ -159,89 +159,80 @@ export default {
       }
     },
     touchStart(index, event) {
-    event.preventDefault();
-    const touch = event.touches[0];
-    this.dragStartIndex = index;
-    this.startTouchX = touch.clientX;
-    this.startTouchY = touch.clientY;
-    this.isDragging = true;
-    
-    // Создаем визуальный эффект для перетаскиваемого элемента
-    const piece = event.target.closest('.puzzle-piece');
-    if (piece) {
-      piece.style.opacity = '0.6';
-      this.draggedElement = piece;
-    }
-  },
-
-  touchMove(event) {
-    if (!this.isDragging) return;
-    event.preventDefault();
-    
-    const touch = event.touches[0];
-    this.currentTouchX = touch.clientX;
-    this.currentTouchY = touch.clientY;
-    
-    // Найти элемент под пальцем
-    const elementUnderTouch = document.elementFromPoint(
-      this.currentTouchX,
-      this.currentTouchY
-    );
-    
-    // Подсветить целевой элемент
-    const targetPiece = elementUnderTouch?.closest('.puzzle-piece');
-    if (targetPiece) {
-      targetPiece.style.border = '2px solid #007bff';
-    }
-    
-    // Очистить подсветку с предыдущих элементов
-    document.querySelectorAll('.puzzle-piece').forEach(piece => {
-      if (piece !== targetPiece) {
-        piece.style.border = '2px solid rgba(0, 0, 0, 0.1)';
-      }
-    });
-  },
-
-    touchEnd(event) {  // Изменено с touchEnd(dropIndex) на touchEnd(event)
-    if (!this.isDragging) return;
-    
-    // Находим элемент в точке отпускания
-    const elementUnderTouch = document.elementFromPoint(
-      this.currentTouchX,
-      this.currentTouchY
-    );
-    const targetPiece = elementUnderTouch?.closest('.puzzle-piece');
-    
-    if (targetPiece) {
-      const targetIndex = Array.from(targetPiece.parentNode.children).indexOf(targetPiece);
+      event.preventDefault();
+      const touch = event.touches[0];
+      this.dragStartIndex = index;
+      this.startTouchX = touch.clientX;
+      this.startTouchY = touch.clientY;
+      this.isDragging = true;
       
-      // Меняем местами элементы
-      if (this.dragStartIndex !== null && targetIndex !== -1) {
-        const temp = this.puzzlePieces[this.dragStartIndex];
-        this.puzzlePieces[this.dragStartIndex] = this.puzzlePieces[targetIndex];
-        this.puzzlePieces[targetIndex] = temp;
+      const piece = event.target.closest('.puzzle-piece');
+      if (piece) {
+        piece.style.opacity = '0.6';
+        this.draggedElement = piece;
       }
-    }
-    
-    // Очищаем состояние
-    this.isDragging = false;
-    this.dragStartIndex = null;
-    this.startTouchX = null;
-    this.startTouchY = null;
-    this.currentTouchX = null;
-    this.currentTouchY = null;
-    
-    // Возвращаем визуальное оформление
-    if (this.draggedElement) {
-      this.draggedElement.style.opacity = '1';
-      this.draggedElement = null;
-    }
-    
-    // Убираем все подсветки
-    document.querySelectorAll('.puzzle-piece').forEach(piece => {
-      piece.style.border = '2px solid rgba(0, 0, 0, 0.1)';
-    });
-  },
+    },
+
+    touchMove(event) {
+      if (!this.isDragging) return;
+      event.preventDefault();
+      
+      const touch = event.touches[0];
+      this.currentTouchX = touch.clientX;
+      this.currentTouchY = touch.clientY;
+      
+      const elementUnderTouch = document.elementFromPoint(
+        this.currentTouchX,
+        this.currentTouchY
+      );
+      
+      const targetPiece = elementUnderTouch?.closest('.puzzle-piece');
+      if (targetPiece) {
+        targetPiece.style.border = '2px solid #007bff';
+      }
+      
+      document.querySelectorAll('.puzzle-piece').forEach(piece => {
+        if (piece !== targetPiece) {
+          piece.style.border = '2px solid rgba(0, 0, 0, 0.1)';
+        }
+      });
+    },
+
+    touchEnd(event) {
+      if (!this.isDragging) return;
+      
+      const elementUnderTouch = document.elementFromPoint(
+        this.currentTouchX,
+        this.currentTouchY
+      );
+      const targetPiece = elementUnderTouch?.closest('.puzzle-piece');
+      
+      if (targetPiece) {
+        const targetIndex = Array.from(targetPiece.parentNode.children).indexOf(targetPiece);
+        
+        if (this.dragStartIndex !== null && targetIndex !== -1) {
+          const temp = this.puzzlePieces[this.dragStartIndex];
+          this.puzzlePieces[this.dragStartIndex] = this.puzzlePieces[targetIndex];
+          this.puzzlePieces[targetIndex] = temp;
+        }
+      }
+      
+      this.isDragging = false;
+      this.dragStartIndex = null;
+      this.startTouchX = null;
+      this.startTouchY = null;
+      this.currentTouchX = null;
+      this.currentTouchY = null;
+      
+      if (this.draggedElement) {
+        this.draggedElement.style.opacity = '1';
+        this.draggedElement = null;
+      }
+      
+      document.querySelectorAll('.puzzle-piece').forEach(piece => {
+        piece.style.border = '2px solid rgba(0, 0, 0, 0.1)';
+      });
+    },
     viewLeaderboard() {
       this.$router.push('/leaderboard');
     },
@@ -297,7 +288,7 @@ export default {
   border: 2px solid rgba(0, 0, 0, 0.1);
   box-sizing: content-box;
   position: relative;
-  touch-action: none; /* Важно для работы перетаскивания на тачскринах */
+  touch-action: none;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -312,7 +303,7 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  pointer-events: none; /* Предотвращает проблемы с перетаскиванием изображений */
+  pointer-events: none;
   user-select: none;
   -webkit-user-select: none;
 }
