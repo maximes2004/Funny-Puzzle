@@ -198,41 +198,44 @@ export default {
       });
     },
 
-    touchEnd(event) {
-      if (!this.isDragging) return;
+    touchEnd() {  // Убираем неиспользуемый параметр event
+    if (!this.isDragging) return;
+    
+    const elementUnderTouch = document.elementFromPoint(
+      this.currentTouchX,
+      this.currentTouchY
+    );
+    const targetPiece = elementUnderTouch?.closest('.puzzle-piece');
+    
+    if (targetPiece) {
+      const targetIndex = Array.from(targetPiece.parentNode.children).indexOf(targetPiece);
       
-      const elementUnderTouch = document.elementFromPoint(
-        this.currentTouchX,
-        this.currentTouchY
-      );
-      const targetPiece = elementUnderTouch?.closest('.puzzle-piece');
-      
-      if (targetPiece) {
-        const targetIndex = Array.from(targetPiece.parentNode.children).indexOf(targetPiece);
-        
-        if (this.dragStartIndex !== null && targetIndex !== -1) {
-          const temp = this.puzzlePieces[this.dragStartIndex];
-          this.puzzlePieces[this.dragStartIndex] = this.puzzlePieces[targetIndex];
-          this.puzzlePieces[targetIndex] = temp;
-        }
+      if (this.dragStartIndex !== null && targetIndex !== -1) {
+        const temp = this.puzzlePieces[this.dragStartIndex];
+        this.puzzlePieces[this.dragStartIndex] = this.puzzlePieces[targetIndex];
+        this.puzzlePieces[targetIndex] = temp;
       }
-      
-      this.isDragging = false;
-      this.dragStartIndex = null;
-      this.startTouchX = null;
-      this.startTouchY = null;
-      this.currentTouchX = null;
-      this.currentTouchY = null;
-      
-      if (this.draggedElement) {
-        this.draggedElement.style.opacity = '1';
-        this.draggedElement = null;
-      }
-      
-      document.querySelectorAll('.puzzle-piece').forEach(piece => {
-        piece.style.border = '2px solid rgba(0, 0, 0, 0.1)';
-      });
-    },
+    }
+    
+    // Очищаем состояние
+    this.isDragging = false;
+    this.dragStartIndex = null;
+    this.startTouchX = null;
+    this.startTouchY = null;
+    this.currentTouchX = null;
+    this.currentTouchY = null;
+    
+    // Возвращаем визуальное оформление
+    if (this.draggedElement) {
+      this.draggedElement.style.opacity = '1';
+      this.draggedElement = null;
+    }
+    
+    // Убираем все подсветки
+    document.querySelectorAll('.puzzle-piece').forEach(piece => {
+      piece.style.border = '2px solid rgba(0, 0, 0, 0.1)';
+    });
+  },
     viewLeaderboard() {
       this.$router.push('/leaderboard');
     },
