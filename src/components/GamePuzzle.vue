@@ -28,7 +28,7 @@
           :class="['puzzle-piece', { dragging: isDragging && dragStartIndex === index }]"
           @dragstart="dragStart"
           @dragover="dragOver"
-          @drop="(event) => dropPiece(index, event)"  <!-- Передаем оба параметра -->
+          @drop="(event) => dropPiece(index, event)"
           @touchstart="touchStart(index, $event)"
           @touchmove="touchMove($event)"
           @touchend="touchEnd"
