@@ -23,24 +23,25 @@
     <div v-if="gameStarted">
       <div class="puzzle-grid">
         <div
-          v-for="(piece, index) in puzzlePieces"
-          :key="index"
-          :class="['puzzle-piece', { dragging: isDragging && dragStartIndex === index }]"
-          @dragstart="dragStart"
-          @dragover="dragOver"
-          @drop="(event) => dropPiece(index, event)"
-          @touchstart="touchStart(index, $event)"
-          @touchmove="touchMove($event)"
-          @touchend="touchEnd"
-        >
-          <img
-            :src="piece.img"
-            :alt="piece.alt"
-            :id="piece.id"
-            class="puzzle-img"
-            draggable="true"
-          />
-        </div>
+    v-for="(piece, index) in puzzlePieces"
+    :key="index"
+    :class="['puzzle-piece', { dragging: isDragging && dragStartIndex === index }]"
+    draggable="true"
+    @dragstart="dragStart"
+    @dragover.prevent="dragOver"
+    @drop="(event) => dropPiece(index, event)"
+    @touchstart="touchStart(index, $event)"
+    @touchmove="touchMove($event)"
+    @touchend="touchEnd"
+>
+    <img
+        :src="piece.img"
+        :alt="piece.alt"
+        :id="piece.id"
+        class="puzzle-img"
+        draggable="false"
+    />
+</div>
       </div>
 
       <p class="timer-block">Время: {{ timer }}</p>
@@ -143,29 +144,56 @@ export default {
     shufflePuzzle() {
       this.puzzlePieces = this.puzzlePieces.sort(() => Math.random() - 0.5);
     },
-    dragStart(e) {
-      e.dataTransfer.setData('text/plain', e.target.id);
-    },
-    dragOver(e) {
-      e.preventDefault();
-    },
-    // Обработка сброса перетаскиваемого элемента
-    dropPiece(index, event) { // Добавляем параметр event
-        // Получаем идентификатор перетаскиваемого элемента из события
-        const draggedId = event.dataTransfer.getData('text/plain');
-        
-        // Находим индекс элемента в массиве по его id
-        const draggedIndex = this.puzzlePieces.findIndex((piece) => piece.id === draggedId);
-        
-        // Если элемент найден
-        if (draggedIndex !== -1) {
-            // Создаем временную копию перетаскиваемого элемента
-            const temp = this.puzzlePieces[draggedIndex];
-            // Меняем местами элементы
-            this.puzzlePieces[draggedIndex] = this.puzzlePieces[index];
-            this.puzzlePieces[index] = temp;
+     // Обработчик начала перетаскивания
+     dragStart(event) {
+        // Сохраняем индекс перетаскиваемого элемента
+        const draggedPiece = event.target.closest('.puzzle-piece');
+        if (draggedPiece) {
+            const index = Array.from(draggedPiece.parentNode.children).indexOf(draggedPiece);
+            this.dragStartIndex = index;
+            // Устанавливаем данные для передачи
+            event.dataTransfer.setData('text/plain', index.toString());
+            // Устанавливаем эффект перетаскивания
+            event.dataTransfer.effectAllowed = 'move';
         }
     },
+    // Обработчик перетаскивания над элементом
+    dragOver(event) {
+        // Предотвращаем стандартное поведение
+        event.preventDefault();
+        // Устанавливаем эффект перемещения
+        event.dataTransfer.dropEffect = 'move';
+    },
+    // Обработка сброса перетаскиваемого элемента
+    // Обработчик отпускания перетаскиваемого элемента
+    dropPiece(dropIndex, event) {
+        // Предотвращаем стандартное поведение
+        event.preventDefault();
+        
+        // Получаем индекс начального элемента
+        const dragIndex = parseInt(event.dataTransfer.getData('text/plain'));
+        
+        // Проверяем валидность индексов
+        if (!isNaN(dragIndex) && dragIndex !== dropIndex) {
+            // Создаем временную копию массива
+            const newPuzzlePieces = [...this.puzzlePieces];
+            
+            // Сохраняем элементы для обмена
+            const draggedPiece = newPuzzlePieces[dragIndex];
+            const dropPiece = newPuzzlePieces[dropIndex];
+            
+            // Меняем элементы местами
+            newPuzzlePieces[dragIndex] = dropPiece;
+            newPuzzlePieces[dropIndex] = draggedPiece;
+            
+            // Обновляем массив с элементами паззла
+            this.puzzlePieces = newPuzzlePieces;
+        }
+        
+        // Сбрасываем индекс начального элемента
+        this.dragStartIndex = null;
+    },
+
     touchStart(index, event) {
       event.preventDefault();
       const touch = event.touches[0];
