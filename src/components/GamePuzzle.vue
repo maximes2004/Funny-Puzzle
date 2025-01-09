@@ -28,7 +28,8 @@
           :class="['puzzle-piece', { dragging: isDragging && dragStartIndex === index }]"
           @dragstart="dragStart"
           @dragover="dragOver"
-          @drop="dropPiece(index)"
+          <!-- @drop="dropPiece(index)" -->
+          @drop="(event) => dropPiece(index, event)"  <!-- Передаем оба параметра -->
           @touchstart="touchStart(index, $event)"
           @touchmove="touchMove($event)"
           @touchend="touchEnd"
@@ -149,14 +150,31 @@ export default {
     dragOver(e) {
       e.preventDefault();
     },
-    dropPiece(index) {
-      const draggedId = event.dataTransfer.getData('text/plain');
-      const draggedIndex = this.puzzlePieces.findIndex((piece) => piece.id === draggedId);
-      if (draggedIndex !== -1) {
-        const temp = this.puzzlePieces[draggedIndex];
-        this.puzzlePieces[draggedIndex] = this.puzzlePieces[index];
-        this.puzzlePieces[index] = temp;
-      }
+    // dropPiece(index) {
+    //   const draggedId = event.dataTransfer.getData('text/plain');
+    //   const draggedIndex = this.puzzlePieces.findIndex((piece) => piece.id === draggedId);
+    //   if (draggedIndex !== -1) {
+    //     const temp = this.puzzlePieces[draggedIndex];
+    //     this.puzzlePieces[draggedIndex] = this.puzzlePieces[index];
+    //     this.puzzlePieces[index] = temp;
+    //   }
+    // },
+    // Обработка сброса перетаскиваемого элемента
+    dropPiece(index, event) { // Добавляем параметр event
+        // Получаем идентификатор перетаскиваемого элемента из события
+        const draggedId = event.dataTransfer.getData('text/plain');
+        
+        // Находим индекс элемента в массиве по его id
+        const draggedIndex = this.puzzlePieces.findIndex((piece) => piece.id === draggedId);
+        
+        // Если элемент найден
+        if (draggedIndex !== -1) {
+            // Создаем временную копию перетаскиваемого элемента
+            const temp = this.puzzlePieces[draggedIndex];
+            // Меняем местами элементы
+            this.puzzlePieces[draggedIndex] = this.puzzlePieces[index];
+            this.puzzlePieces[index] = temp;
+        }
     },
     touchStart(index, event) {
       event.preventDefault();
